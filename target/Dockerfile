@@ -1,46 +1,16 @@
-# # Base Tomcat image
-# FROM tomcat:9.0-jdk11-openjdk
-
-# # Remove default webapps
-# RUN rm -rf /usr/local/tomcat/webapps/*
-
-# # Copy WAR file to Tomcat
-# #COPY spring-boot-rest-example-0.5.0.war /usr/local/tomcat/webapps/ROOT.war
-# COPY spring-boot-rest-example-0.5.0.war /usr/local/tomcat/webapps/ROOT.war
-
-
-# # Expose port 8090
-# EXPOSE 8090
-
-# # Set Tomcat to run
-# # CMD ["catalina.sh", "run"]
-# # Use Tomcat base image
-# FROM tomcat:9.0-jdk11-openjdk
-
-# # Remove default webapps
-# RUN rm -rf /usr/local/tomcat/webapps/*
-
-# # Copy WAR from build args
-# ARG WAR_FILE
-# COPY ${WAR_FILE} /usr/local/tomcat/webapps/ROOT.war
-
-# # Expose port 8090
-# EXPOSE 8090
-
-# # Start Tomcat
-# CMD ["catalina.sh", "run"]
-FROM tomcat:9.0-jdk11-openjdk
-
-# Remove default webapps
-RUN rm -rf /usr/local/tomcat/webapps/*
-
-# Copy WAR as ROOT.war
-COPY spring-boot-rest-example-0.5.0.war /usr/local/tomcat/webapps/ROOT.war
-
-# Set Tomcat to listen on 8090
-RUN sed -i 's/port="8080"/port="8090"/' /usr/local/tomcat/conf/server.xml
-
-EXPOSE 8090
-
-CMD ["catalina.sh", "run"]
-
+FROM openjdk:8-jdk-alpine
+ 
+# Add a volume pointing to /tmp
+VOLUME /tmp
+ 
+# Copy the WAR file from the build stage
+ 
+COPY --from=build /app/target/spring-boot-rest-example-0.5.0.war app.war
+ 
+# Expose Spring Boot default port
+ 
+EXPOSE 8091
+ 
+# Run the application
+ 
+ENTRYPOINT ["java","-jar","/app.war"]
