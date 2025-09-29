@@ -1,47 +1,47 @@
-# Docker Build & Push
+# Docker Build & Push Pipeline
 trigger:
-  - master
+- master
 
 resources:
-  - repo: self
+- repo: self
 
 variables:
-  - group: docker_hub_secrets   # Reference your variable group here
-  - name: tag
-    value: '$(Build.BuildId)'
+- group: docker_hub_secrets   # Correctly reference the variable group
+- name: tag
+  value: '$(Build.BuildId)'    # Unique tag for each build
 
 stages:
-  - stage: BuildAndPush
-    displayName: Build and Push Docker Image
-    jobs:
-      - job: Build
-        displayName: Build and Push
-        pool:
-          name: agent_ayesha
-        steps:
-          # Docker login using PAT from variable group
-          - task: Docker@2
-            displayName: Docker Login
-            inputs:
-              command: login
-              containerRegistry: 'dockerhub'
-              username: $(DOCKERHUB_USERNAME)    # From variable group
-              password: $(DOCKERHUB_PAT)         # From variable group
+- stage: BuildAndPush
+  displayName: Build and Push Docker Image
+  jobs:
+  - job: Build
+    displayName: Build & Push
+    pool:
+      name: agent_ayesha
+    steps:
+    # Docker login using service connection
+    - task: Docker@2
+      displayName: Docker Login
+      inputs:
+        command: login
+        containerRegistry: 'dockerhub'  # Your service connection name
+        username: $(DOCKERHUB_USERNAME)
+        password: $(DOCKERHUB_PAT)
 
-          # Build Docker image
-          - task: Docker@2
-            displayName: Build Docker Image
-            inputs:
-              command: build
-              dockerfile: '$(Build.SourcesDirectory)/target/Dockerfile'
-              tags: |
-                $(tag)
+    # Build Docker image
+    - task: Docker@2
+      displayName: Build Docker Image
+      inputs:
+        command: build
+        dockerfile: '$(Build.SourcesDirectory)/target/Dockerfile'
+        tags: |
+          ksayesha/sbootksa:$(tag)
 
-          # Push Docker image to Docker Hub
-          - task: Docker@2
-            displayName: Push Docker Image
-            inputs:
-              command: push
-              repository: 'ksayesha/sbootksa'    # Your Docker Hub repo
-              tags: |
-                $(tag)
+    # Push Docker image to Docker Hub
+    - task: Docker@2
+      displayName: Push Docker Image
+      inputs:
+        command: push
+        repository: 'ksayesha/sbootksa'
+        tags: |
+          $(tag)
