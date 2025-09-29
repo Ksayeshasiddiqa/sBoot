@@ -13,7 +13,7 @@ WORKDIR /app
 # Copy the pom.xml and download dependencies (cached in Docker layer)
  
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
+#RUN mvn dependency:go-offline -B
  
 # Copy the source code
  
